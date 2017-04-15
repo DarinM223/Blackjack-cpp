@@ -5,3 +5,4 @@ CMakeFiles/
 Blackjack
 Blackjack_test
 gtest-prefix/
+*.a

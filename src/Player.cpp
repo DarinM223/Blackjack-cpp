@@ -17,16 +17,22 @@ std::tuple<int, int> addScore(int prevScore, int value, int numHighAces) {
 
 Action Player::turn() const {
   while (true) {
-    std::cout << "Enter (1) to Hit, (2) to Stand\n";
+    std::cout << "Enter (1) to Hit, (2) to Stand, "
+              << "(3) to Double, (4) to Split\n";
 
     std::string buf;
     std::getline(std::cin, buf);
 
     int actionNum = std::stoi(buf);
-    if (actionNum == 1) {
-      return Action::HIT;
-    } else if (actionNum == 2) {
-      return Action::STAND;
+    switch (actionNum) {
+      case 1:
+        return Action::HIT;
+      case 2:
+        return Action::STAND;
+      case 3:
+        return Action::DOUBLE;
+      case 4:
+        return Action::SPLIT;
     }
   }
 }

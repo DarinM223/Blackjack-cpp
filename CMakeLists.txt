@@ -47,10 +47,13 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src
 )
 
+# Makes a library from the sources to be used in the test executable.
+add_library(Blackjack_lib ${SRCS})
+
 # Normal blackjack executable.
 add_executable(Blackjack ${SRCS})
 
 # Test blackjack executable.
 add_executable(Blackjack_test ${TEST_SRCS})
 add_dependencies(Blackjack_test libgmock libgtest)
-target_link_libraries(Blackjack_test libgtest libgmock)
+target_link_libraries(Blackjack_test Blackjack_lib libgtest libgmock)
