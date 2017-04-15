@@ -14,7 +14,7 @@ include(ExternalProject)
 
 # Downloads googletest from external git repository.
 ExternalProject_Add(
-    gtest
+    googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
     UPDATE_COMMAND ""
     INSTALL_COMMAND ""
@@ -24,21 +24,23 @@ ExternalProject_Add(
 )
 
 # Get some properties from the googletest project.
-ExternalProject_Get_Property(gtest source_dir binary_dir)
+ExternalProject_Get_Property(googletest source_dir binary_dir)
 
 # Sets up googletest library.
-add_library(libgtest IMPORTED STATIC GLOBAL)
+add_library(libgtest UNKNOWN IMPORTED)
 set_target_properties(libgtest PROPERTIES
     "IMPORTED_LOCATION" "${binary_dir}/googlemock/gtest/libgtest.a"
     "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}"
 )
+add_dependencies(libgtest googletest)
 
 # Sets up googlemock library.
-add_library(libgmock IMPORTED STATIC GLOBAL)
+add_library(libgmock UNKNOWN IMPORTED)
 set_target_properties(libgmock PROPERTIES
     "IMPORTED_LOCATION" "${binary_dir}/googlemock/libgmock.a"
     "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}"
 )
+add_dependencies(libgmock googletest)
 
 # Include the googletest and googlemock libraries along with your main source folder.
 include_directories(

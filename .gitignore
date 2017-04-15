@@ -4,5 +4,5 @@ Makefile
 CMakeFiles/
 Blackjack
 Blackjack_test
-gtest-prefix/
+googletest-prefix/
 *.a
