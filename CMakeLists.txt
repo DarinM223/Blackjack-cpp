@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
 
-set(CMAKE_CXX_COMPILER "g++")
-set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Werror -lpthread")
+if(APPLE)
+    set(CMAKE_CXX_COMPILER "g++-6") # Set this to the homebrew latest g++.
+    set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Werror")
+elseif(UNIX)
+    set(CMAKE_CXX_COMPILER "g++")
+    set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Werror -lpthread")
+endif()
 
 project(Blackjack)
 
@@ -16,6 +21,8 @@ include(ExternalProject)
 ExternalProject_Add(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
+    CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+    -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
     UPDATE_COMMAND ""
     INSTALL_COMMAND ""
     LOG_DOWNLOAD ON
