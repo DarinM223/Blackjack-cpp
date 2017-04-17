@@ -8,7 +8,7 @@
 namespace Blackjack {
 
 struct EmptyDeckException : public std::exception {
-  const char* what() const throw() { return "Deck is empty"; }
+  const char* what() const noexcept { return "Deck is empty"; }
 };
 
 enum class Suite { HEARTS = 0, DIAMONDS, SPADES, CLUBS };

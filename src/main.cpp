@@ -6,7 +6,7 @@ using namespace Blackjack;
 
 int main() {
   std::random_device rd;
-  Deck deck(rd);
+  Deck deck{rd};
   deck.shuffle();
 
   std::cout << "Number of cards in deck: " << deck.size() << "\n";

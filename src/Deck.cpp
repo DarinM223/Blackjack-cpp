@@ -3,8 +3,8 @@
 namespace Blackjack {
 
 int random_range(std::random_device& rd, int min, int max) {
-  std::mt19937 rng(rd());
-  std::uniform_int_distribution<int> uni(min, max);
+  std::mt19937 rng{rd()};
+  std::uniform_int_distribution<int> uni{min, max};
 
   return uni(rng);
 }
@@ -21,7 +21,7 @@ Deck::Deck(std::random_device& rd) : rd_(rd) {
 
 Card Deck::draw() {
   if (this->cards_.size() <= 0) {
-    throw EmptyDeckException();
+    throw EmptyDeckException{};
   }
 
   // Move out last card and remove it from the vector.

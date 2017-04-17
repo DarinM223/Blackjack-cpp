@@ -4,7 +4,15 @@
 
 namespace Blackjack {
 
-std::tuple<int, int> addScore(int prevScore, int value, int numHighAces) {
+std::tuple<int, int> addCard(const Card& card, int prevScore, int numHighAces) {
+  int value;
+  if (card.value() == 1) {
+    numHighAces++;
+    value = 11;
+  } else {
+    value = card.value();
+  }
+
   int score = prevScore + value;
 
   while (score > 21 && numHighAces > 0) {
@@ -15,38 +23,121 @@ std::tuple<int, int> addScore(int prevScore, int value, int numHighAces) {
   return std::make_tuple(score, numHighAces);
 }
 
-Action Player::turn() const {
-  while (true) {
-    std::cout << "Enter (1) to Hit, (2) to Stand, "
-              << "(3) to Double, (4) to Split\n";
+std::vector<Action> Player::turn() const {
+  std::vector<Action> result;
+  for (size_t i = 0; i < this->cards_.size(); i++) {
+    bool done = false;
+    while (!done) {
+      std::cout << "Enter (1) to Hit, (2) to Stand, "
+                << "(3) to Double, (4) to Split\n";
 
-    std::string buf;
-    std::getline(std::cin, buf);
+      std::string buf;
+      std::getline(std::cin, buf);
 
-    int actionNum = std::stoi(buf);
-    switch (actionNum) {
-      case 1:
-        return Action::HIT;
-      case 2:
-        return Action::STAND;
-      case 3:
-        return Action::DOUBLE;
-      case 4:
-        return Action::SPLIT;
+      int actionNum = std::stoi(buf);
+      switch (actionNum) {
+        case 1:
+          result.push_back(Action::HIT);
+          done = true;
+          break;
+        case 2:
+          result.push_back(Action::STAND);
+          done = true;
+          break;
+        case 3:
+          result.push_back(Action::DOUBLE);
+          done = true;
+          break;
+        case 4:
+          result.push_back(Action::SPLIT);
+          done = true;
+          break;
+      }
     }
   }
+
+  return result;
 }
 
-void Player::addCard(Card card) {
-  int value;
-  if (card.value() == 1) {
-    this->numHighAces_++;
-    value = 11;
-  } else {
-    value = card.value();
+void Player::addCard(size_t handIndex, Card card) {
+  std::tie(scores_[handIndex], numHighAces_[handIndex]) =
+      Blackjack::addCard(card, scores_[handIndex], numHighAces_[handIndex]);
+  this->cards_[handIndex].push_back(card);
+}
+
+bool Player::addMoney(int difference) {
+  int newAmount = this->money_ + difference;
+  if (newAmount < 0) {
+    return false;
   }
 
-  std::tie(score_, numHighAces_) = addScore(score_, value, numHighAces_);
+  this->money_ = newAmount;
+  return true;
+}
+
+bool Player::addBet(size_t index, int amount) {
+  if (amount < 0 || !this->addMoney(-amount)) {
+    return false;
+  }
+
+  this->bets_[index] += amount;
+  return true;
+}
+
+bool Player::split(size_t handIndex) {
+  auto hand = this->cards_[handIndex];
+
+  if (hand.size() == 2 && hand[0].value() == hand[1].value()) {
+    auto bet = this->bets_[handIndex];
+    if (!this->addMoney(-bet)) {
+      return false;
+    }
+
+    auto card = this->removeCard(handIndex, hand.size() - 1);
+
+    this->scores_.push_back(0);
+    this->numHighAces_.push_back(0);
+    this->bets_.push_back(bet);
+    this->cards_.push_back({});
+
+    this->addCard(this->hands() - 1, card);
+    return true;
+  }
+  return false;
+}
+
+void Player::reset() {
+  this->scores_.clear();
+  this->numHighAces_.clear();
+  this->cards_.clear();
+  this->bets_.clear();
+
+  this->scores_.push_back(0);
+  this->numHighAces_.push_back(0);
+  this->bets_.push_back(0);
+  this->cards_.push_back({});
+}
+
+Card Player::removeCard(size_t handIndex, size_t cardIndex) {
+  auto hand = this->cards_[handIndex];
+  auto card = std::move(hand[cardIndex]);
+  hand.erase(hand.begin() + cardIndex);
+
+  // Recalculate the score by adding all the cards again.
+  int numHighAces = 0;
+  int score = 0;
+  for (const Card& card : hand) {
+    std::tie(score, numHighAces) = Blackjack::addCard(card, score, numHighAces);
+  }
+
+  this->scores_[handIndex] = score;
+  this->numHighAces_[handIndex] = numHighAces;
+  return card;
+}
+
+void Dealer::addCard(Card card) {
+  std::tie(score_, numHighAces_) =
+      Blackjack::addCard(card, score_, numHighAces_);
 }
 
 Action Dealer::turn() const {
