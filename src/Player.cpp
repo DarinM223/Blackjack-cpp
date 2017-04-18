@@ -28,6 +28,12 @@ Action Player::turn(size_t handIndex) const {
   while (!done) {
     std::cout << "Player " << this->name_ << "'s money: " << this->money_
               << "\n";
+    if (this->cards_[handIndex].size() == 2 &&
+        this->cards_[handIndex][0].value() ==
+            this->cards_[handIndex][1].value()) {
+      std::cout << "Player has a pair of cards with value "
+                << this->cards_[handIndex][0].value() << "\n";
+    }
     std::cout << "Player " << this->name_ << " current score for hand "
               << handIndex + 1 << ": " << this->scores_[handIndex] << "\n";
     std::cout << "Enter (1) to Hit, (2) to Stand, "

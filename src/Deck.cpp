@@ -12,10 +12,11 @@ int random_range(std::random_device& rd, int min, int max) {
 Deck::Deck(std::random_device& rd) : rd_(rd) {
   // Generates standard 52 card deck.
   for (int value = 1; value <= 13; value++) {
-    this->cards_.push_back(Card(Suite::DIAMONDS, value));
-    this->cards_.push_back(Card(Suite::HEARTS, value));
-    this->cards_.push_back(Card(Suite::SPADES, value));
-    this->cards_.push_back(Card(Suite::CLUBS, value));
+    int cardValue = value > 9 ? 10 : value;
+    this->cards_.push_back(Card(Suite::DIAMONDS, cardValue));
+    this->cards_.push_back(Card(Suite::HEARTS, cardValue));
+    this->cards_.push_back(Card(Suite::SPADES, cardValue));
+    this->cards_.push_back(Card(Suite::CLUBS, cardValue));
   }
 }
 
