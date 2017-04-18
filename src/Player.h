@@ -18,9 +18,12 @@ class Player {
 
   std::string name() const { return this->name_; }
   std::vector<int> scores() const { return this->scores_; }
+  virtual bool isBust(size_t handIndex) const {
+    return this->scores_[handIndex] > 21;
+  }
   size_t hands() const { return this->cards_.size(); }
   void addCard(size_t handIndex, Card card);
-  virtual std::vector<Action> turn() const;
+  virtual Action turn(size_t handIndex) const;
 
   int money() const { return this->money_; }
   bool addMoney(int difference);
@@ -47,6 +50,7 @@ class Dealer {
   Dealer(std::string name) : score_(0), numHighAces_(0), name_(name) {}
 
   std::string name() const { return this->name_; }
+  virtual bool isBust() const { return this->score_ > 21; }
   void addCard(Card card);
   Action turn() const;
   int score() const { return this->score_; }
@@ -55,7 +59,6 @@ class Dealer {
   int score_;
   int numHighAces_;
   std::string name_;
-  std::vector<Card> hand_;
 };
 
 }  // namespace Blackjack

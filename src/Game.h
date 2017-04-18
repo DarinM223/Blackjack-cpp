@@ -16,13 +16,13 @@ class Game {
        std::vector<std::string> playerNames, int initMoney);
   virtual void askBets();
   virtual void run();
-  virtual void applyAction(Player& player, size_t handIndex, Action action);
+  virtual bool applyAction(Player& player, size_t handIndex, Action action);
+  virtual bool applyAction(Dealer& dealer, Action action);
 
  private:
   Deck deck_;
   Dealer dealer_;
   std::vector<Player> players_;
-  std::unordered_map<std::string, int> bets_;
 };
 
 }  // namespace Blackjack

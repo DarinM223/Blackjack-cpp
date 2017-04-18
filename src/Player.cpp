@@ -23,40 +23,32 @@ std::tuple<int, int> addCard(const Card& card, int prevScore, int numHighAces) {
   return std::make_tuple(score, numHighAces);
 }
 
-std::vector<Action> Player::turn() const {
-  std::vector<Action> result;
-  for (size_t i = 0; i < this->cards_.size(); i++) {
-    bool done = false;
-    while (!done) {
-      std::cout << "Enter (1) to Hit, (2) to Stand, "
-                << "(3) to Double, (4) to Split\n";
+Action Player::turn(size_t handIndex) const {
+  bool done = false;
+  while (!done) {
+    std::cout << "Enter (1) to Hit, (2) to Stand, "
+              << "(3) to Double, (4) to Split\n";
 
-      std::string buf;
-      std::getline(std::cin, buf);
+    std::string buf;
+    std::getline(std::cin, buf);
 
-      int actionNum = std::stoi(buf);
-      switch (actionNum) {
-        case 1:
-          result.push_back(Action::HIT);
-          done = true;
-          break;
-        case 2:
-          result.push_back(Action::STAND);
-          done = true;
-          break;
-        case 3:
-          result.push_back(Action::DOUBLE);
-          done = true;
-          break;
-        case 4:
-          result.push_back(Action::SPLIT);
-          done = true;
-          break;
-      }
+    int actionNum = std::stoi(buf);
+    switch (actionNum) {
+      case 1:
+        return Action::HIT;
+      case 2:
+        return Action::STAND;
+      case 3:
+        return Action::DOUBLE;
+      case 4:
+        return Action::SPLIT;
+      default:
+        std::cout << "Invalid number entered\n";
+        break;
     }
   }
 
-  return result;
+  return Action::STAND;
 }
 
 void Player::addCard(size_t handIndex, Card card) {
