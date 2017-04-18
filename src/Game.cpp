@@ -20,9 +20,15 @@ void Game::askBets() {
 
       std::string buf;
       std::getline(std::cin, buf);
-      int betAmount = std::stoi(buf);
+      int betAmount;
+      try {
+        betAmount = std::stoi(buf);
+      } catch (std::exception e) {
+        std::cout << "You didn't enter a valid number\n";
+        continue;
+      }
 
-      if (player.addBet(0, betAmount)) {
+      if (betAmount > 0 && player.addBet(0, betAmount)) {
         break;
       } else {
         std::cout << "You entered an invalid bet\n";
@@ -33,11 +39,25 @@ void Game::askBets() {
 
 void Game::run() {
   this->askBets();
+
   for (Player& player : this->players_) {
+    // Deal two cards to every player initially.
+    auto card1 = this->deck_.draw();
+    auto card2 = this->deck_.draw();
+    player.addCard(0, card1);
+    player.addCard(0, card2);
+
+    // Handle actions for every hand the player has.
     for (size_t handIndex = 0; handIndex < player.hands(); handIndex++) {
       while (!player.isBust(handIndex)) {
-        auto action = player.turn(handIndex);
-        this->applyAction(player, handIndex, action);
+        Action action;
+        bool validAction;
+        do {
+          action = player.turn(handIndex);
+          validAction = this->applyAction(player, handIndex, action);
+
+          if (!validAction) std::cout << "Invalid action\n";
+        } while (!validAction);
 
         if (action == Action::STAND) {
           break;
@@ -51,11 +71,23 @@ void Game::run() {
     this->applyAction(this->dealer_, action);
 
     if (action == Action::STAND) {
+      std::cout << "Dealer stood\n";
       break;
+    } else {
+      std::cout << "Dealer hit\n";
+      std::cout << "Dealer's score is: " << this->dealer_.score() << "\n";
     }
   }
 
   // TODO(DarinM223): handle final scores.
+  std::cout << "Dealer's score is: " << this->dealer_.score() << "\n";
+  for (Player& player : this->players_) {
+    std::cout << player.name() << "'s scores is: ";
+    for (const int& score : player.scores()) {
+      std::cout << score << " ";
+    }
+    std::cout << "\n";
+  }
 }
 
 bool Game::applyAction(Player& player, size_t handIndex, Action action) {

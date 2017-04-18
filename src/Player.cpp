@@ -26,13 +26,23 @@ std::tuple<int, int> addCard(const Card& card, int prevScore, int numHighAces) {
 Action Player::turn(size_t handIndex) const {
   bool done = false;
   while (!done) {
+    std::cout << "Player " << this->name_ << "'s money: " << this->money_
+              << "\n";
+    std::cout << "Player " << this->name_ << " current score for hand "
+              << handIndex + 1 << ": " << this->scores_[handIndex] << "\n";
     std::cout << "Enter (1) to Hit, (2) to Stand, "
               << "(3) to Double, (4) to Split\n";
 
     std::string buf;
     std::getline(std::cin, buf);
 
-    int actionNum = std::stoi(buf);
+    int actionNum;
+    try {
+      actionNum = std::stoi(buf);
+    } catch (std::exception e) {
+      std::cout << "Invalid number entered\n";
+      continue;
+    }
     switch (actionNum) {
       case 1:
         return Action::HIT;
