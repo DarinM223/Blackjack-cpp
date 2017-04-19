@@ -3,6 +3,19 @@
 
 namespace Blackjack {
 
+std::string playerResultToString(PlayerResult result) {
+  switch (result) {
+    case PlayerResult::WIN:
+      return "win";
+    case PlayerResult::LOSE:
+      return "lose";
+    case PlayerResult::PUSH:
+      return "push";
+    default:
+      return "";
+  }
+}
+
 Game::Game(std::random_device& rd, std::string dealerName,
            std::vector<std::string> playerNames, int initMoney)
     : deck_(rd), dealer_(dealerName) {
@@ -40,14 +53,20 @@ void Game::askBets() {
 void Game::run() {
   this->askBets();
 
+  // Deals two cards to dealer.
+  auto card1 = this->deck_.draw();
+  auto card2 = this->deck_.draw();
+  this->dealer_.addCard(card1);
+  this->dealer_.addCard(card2);
+
   for (Player& player : this->players_) {
-    // Deal two cards to every player initially.
+    // Deals two cards to every player initially.
     auto card1 = this->deck_.draw();
     auto card2 = this->deck_.draw();
     player.addCard(0, card1);
     player.addCard(0, card2);
 
-    // Handle actions for every hand the player has.
+    // Handles actions for every hand the player has.
     for (size_t handIndex = 0; handIndex < player.hands(); handIndex++) {
       while (!player.isBust(handIndex)) {
         Action action;
@@ -66,6 +85,7 @@ void Game::run() {
     }
   }
 
+  // Handles actions for the dealer.
   while (!this->dealer_.isBust()) {
     auto action = this->dealer_.turn();
     this->applyAction(this->dealer_, action);
@@ -79,15 +99,25 @@ void Game::run() {
     }
   }
 
-  // TODO(DarinM223): handle final scores.
-  std::cout << "Dealer's score is: " << this->dealer_.score() << "\n";
+  // Displays and applies results and resets all of the scores.
+  const int dealerScore = this->dealer_.score();
+  std::cout << "Dealer's score is: " << dealerScore << "\n";
   for (Player& player : this->players_) {
-    std::cout << player.name() << "'s scores is: ";
-    for (const int& score : player.scores()) {
-      std::cout << score << " ";
+    std::cout << player.name() << "'s scores is:\n";
+    for (size_t i = 0; i < player.hands(); i++) {
+      const int score = player.score(i);
+      std::cout << score << ": ";
+
+      auto result = this->scoreHand(dealerScore, score);
+      std::cout << playerResultToString(result) << "\n";
+      this->applyResult(player, i, result);
     }
     std::cout << "\n";
+
+    player.reset();
   }
+
+  this->dealer_.reset();
 }
 
 bool Game::applyAction(Player& player, size_t handIndex, Action action) {
@@ -125,6 +155,35 @@ bool Game::applyAction(Dealer& dealer, Action action) {
       return true;
     default:
       return false;
+  }
+}
+
+void Game::applyResult(Player& player, size_t handIndex, PlayerResult result) {
+  const int bet = player.bet(handIndex);
+  switch (result) {
+    case PlayerResult::WIN:
+      player.addMoney(bet * 2);
+      break;
+    case PlayerResult::PUSH:
+      player.addMoney(bet);
+      break;
+    case PlayerResult::LOSE:
+      // Do nothing.
+      break;
+  }
+}
+
+PlayerResult Game::scoreHand(int dealerScore, int playerScore) {
+  if (playerScore > 21) {
+    return PlayerResult::LOSE;
+  } else if (dealerScore > 21) {
+    return PlayerResult::WIN;
+  } else if (playerScore == dealerScore) {
+    return PlayerResult::PUSH;
+  } else if (playerScore > dealerScore) {
+    return PlayerResult::WIN;
+  } else {
+    return PlayerResult::LOSE;
   }
 }
 

@@ -156,4 +156,9 @@ Action Dealer::turn() const {
   return Action::HIT;
 }
 
+void Dealer::reset() {
+  this->score_ = 0;
+  this->numHighAces_ = 0;
+}
+
 }  // namespace Blackjack

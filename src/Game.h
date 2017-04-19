@@ -10,6 +10,10 @@
 
 namespace Blackjack {
 
+enum class PlayerResult { WIN = 0, LOSE, PUSH };
+
+std::string playerResultToString(PlayerResult result);
+
 class Game {
  public:
   Game(std::random_device& rd, std::string dealerName,
@@ -18,6 +22,9 @@ class Game {
   virtual void run();
   virtual bool applyAction(Player& player, size_t handIndex, Action action);
   virtual bool applyAction(Dealer& dealer, Action action);
+  virtual void applyResult(Player& player, size_t handIndex,
+                           PlayerResult result);
+  virtual PlayerResult scoreHand(int dealerScore, int playerScore);
 
  private:
   Deck deck_;

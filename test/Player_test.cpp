@@ -80,7 +80,7 @@ TEST(PlayerTest, SplitFail) {
   EXPECT_EQ(player.money(), 40);
 }
 
-TEST(PlayerTest, Reset) {
+TEST(PlayerTest, PlayerReset) {
   Player player{"Bob", 100};
   player.addCard(0, Card{Suite::HEARTS, 1});
   player.addCard(0, Card{Suite::DIAMONDS, 1});
@@ -93,6 +93,16 @@ TEST(PlayerTest, Reset) {
   EXPECT_EQ(player.scores()[0], 0);
   EXPECT_EQ(player.bet(0), 0);
   EXPECT_EQ(player.money(), 80);
+}
+
+TEST(PlayerTest, DealerReset) {
+  Dealer dealer{"Bob"};
+  dealer.addCard(Card{Suite::HEARTS, 1});
+  dealer.addCard(Card{Suite::DIAMONDS, 1});
+
+  dealer.reset();
+
+  EXPECT_EQ(dealer.score(), 0);
 }
 
 TEST(DealerTest, ScoreWithAces) {
