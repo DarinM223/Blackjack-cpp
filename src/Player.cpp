@@ -92,6 +92,28 @@ bool Player::addBet(size_t index, int amount) {
   return true;
 }
 
+void Player::placeBet() {
+  while (true) {
+    std::cout << "Enter the bet for " << this->name() << "\n";
+
+    std::string buf;
+    std::getline(std::cin, buf);
+    int betAmount;
+    try {
+      betAmount = std::stoi(buf);
+    } catch (std::exception e) {
+      std::cout << "You didn't enter a valid number\n";
+      continue;
+    }
+
+    if (betAmount > 0 && this->addBet(0, betAmount)) {
+      break;
+    } else {
+      std::cout << "You entered an invalid bet\n";
+    }
+  }
+}
+
 bool Player::split(size_t handIndex) {
   auto hand = this->cards_[handIndex];
 
@@ -141,6 +163,24 @@ Card Player::removeCard(size_t handIndex, size_t cardIndex) {
   this->scores_[handIndex] = score;
   this->numHighAces_[handIndex] = numHighAces;
   return card;
+}
+
+Action AIPlayer::turn(size_t handIndex) const {
+  // TODO(DarinM223): modify to be smarter than the dealer.
+  if (this->score(handIndex) >= 17) {
+    return Action::STAND;
+  }
+
+  return Action::HIT;
+}
+
+void AIPlayer::placeBet() {
+  // TODO(DarinM223): modify to be smarter than betting fixed amount.
+  const int amount = 10;
+  if (this->addBet(0, amount)) {
+    std::cout << "Player " << this->name() << " placed bet of " << amount
+              << "\n";
+  }
 }
 
 void Dealer::addCard(Card card) {

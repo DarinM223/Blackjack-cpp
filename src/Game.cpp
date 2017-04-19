@@ -16,37 +16,40 @@ std::string playerResultToString(PlayerResult result) {
   }
 }
 
-Game::Game(std::random_device& rd, std::string dealerName,
-           std::vector<std::string> playerNames, int initMoney)
-    : deck_(rd), dealer_(dealerName) {
-  for (const std::string& name : playerNames) {
-    this->players_.push_back(Player{name, initMoney});
+void printAction(std::string name, bool dealer, Action action) {
+  if (dealer) {
+    std::cout << "Dealer ";
+  } else {
+    std::cout << "Player " << name << " ";
   }
 
+  switch (action) {
+    case Action::HIT:
+      std::cout << "hit";
+      break;
+    case Action::STAND:
+      std::cout << "stood";
+      break;
+    case Action::SPLIT:
+      std::cout << "split";
+      break;
+    case Action::DOUBLE:
+      std::cout << "doubled";
+      break;
+  }
+
+  std::cout << "\n";
+}
+
+Game::Game(std::random_device& rd, std::string dealerName,
+           std::vector<std::unique_ptr<Player>> players)
+    : deck_(rd), dealer_(dealerName), players_(std::move(players)) {
   this->deck_.shuffle();
 }
 
 void Game::askBets() {
-  for (Player& player : this->players_) {
-    while (true) {
-      std::cout << "Enter the bet for " << player.name() << "\n";
-
-      std::string buf;
-      std::getline(std::cin, buf);
-      int betAmount;
-      try {
-        betAmount = std::stoi(buf);
-      } catch (std::exception e) {
-        std::cout << "You didn't enter a valid number\n";
-        continue;
-      }
-
-      if (betAmount > 0 && player.addBet(0, betAmount)) {
-        break;
-      } else {
-        std::cout << "You entered an invalid bet\n";
-      }
-    }
+  for (auto& player : this->players_) {
+    player->placeBet();
   }
 }
 
@@ -59,23 +62,26 @@ void Game::run() {
   this->dealer_.addCard(std::move(card1));
   this->dealer_.addCard(std::move(card2));
 
-  for (Player& player : this->players_) {
+  for (auto& player : this->players_) {
     // Deals two cards to every player initially.
     auto card1 = this->deck_.draw();
     auto card2 = this->deck_.draw();
-    player.addCard(0, std::move(card1));
-    player.addCard(0, std::move(card2));
+    player->addCard(0, std::move(card1));
+    player->addCard(0, std::move(card2));
 
     // Handles actions for every hand the player has.
-    for (size_t handIndex = 0; handIndex < player.hands(); handIndex++) {
-      while (!player.isBust(handIndex)) {
+    for (size_t handIndex = 0; handIndex < player->hands(); handIndex++) {
+      while (!player->isBust(handIndex)) {
         Action action;
         bool validAction;
         do {
-          action = player.turn(handIndex);
+          action = player->turn(handIndex);
           validAction = this->applyAction(player, handIndex, action);
 
-          if (!validAction) std::cout << "Invalid action\n";
+          if (!validAction)
+            std::cout << "Invalid action\n";
+          else
+            printAction(player->name(), false, action);
         } while (!validAction);
 
         if (action == Action::STAND) {
@@ -86,26 +92,20 @@ void Game::run() {
   }
 
   // Handles actions for the dealer.
-  while (!this->dealer_.isBust()) {
-    auto action = this->dealer_.turn();
+  Action action;
+  do {
+    action = this->dealer_.turn();
     this->applyAction(this->dealer_, action);
-
-    if (action == Action::STAND) {
-      std::cout << "Dealer stood\n";
-      break;
-    } else {
-      std::cout << "Dealer hit\n";
-      std::cout << "Dealer's score is: " << this->dealer_.score() << "\n";
-    }
-  }
+    printAction(this->dealer_.name(), true, action);
+    std::cout << "Dealer's score is: " << this->dealer_.score() << "\n";
+  } while (!this->dealer_.isBust() && action != Action::STAND);
 
   // Displays and applies results and resets all of the scores.
   const int dealerScore = this->dealer_.score();
-  std::cout << "Dealer's score is: " << dealerScore << "\n";
-  for (Player& player : this->players_) {
-    std::cout << player.name() << "'s scores is:\n";
-    for (size_t i = 0; i < player.hands(); i++) {
-      const int score = player.score(i);
+  for (auto& player : this->players_) {
+    std::cout << player->name() << "'s scores is:\n";
+    for (size_t i = 0; i < player->hands(); i++) {
+      const int score = player->score(i);
       std::cout << score << ": ";
 
       auto result = this->scoreHand(dealerScore, score);
@@ -114,27 +114,28 @@ void Game::run() {
     }
     std::cout << "\n";
 
-    player.reset();
+    player->reset();
   }
 
   this->dealer_.reset();
 }
 
-bool Game::applyAction(Player& player, size_t handIndex, Action action) {
+bool Game::applyAction(std::unique_ptr<Player>& player, size_t handIndex,
+                       Action action) {
   switch (action) {
     case Action::DOUBLE:
-      if (!player.addBet(handIndex, player.bet(handIndex))) return false;
+      if (!player->addBet(handIndex, player->bet(handIndex))) return false;
     case Action::HIT: {
       auto card = this->deck_.draw();
-      player.addCard(handIndex, std::move(card));
+      player->addCard(handIndex, std::move(card));
       return true;
     }
     case Action::SPLIT: {
-      if (!player.split(handIndex)) return false;
+      if (!player->split(handIndex)) return false;
       auto card1 = this->deck_.draw();
       auto card2 = this->deck_.draw();
-      player.addCard(handIndex, std::move(card1));
-      player.addCard(player.hands() - 1, std::move(card2));
+      player->addCard(handIndex, std::move(card1));
+      player->addCard(player->hands() - 1, std::move(card2));
       return true;
     }
     case Action::STAND:
@@ -158,14 +159,15 @@ bool Game::applyAction(Dealer& dealer, Action action) {
   }
 }
 
-void Game::applyResult(Player& player, size_t handIndex, PlayerResult result) {
-  const int bet = player.bet(handIndex);
+void Game::applyResult(std::unique_ptr<Player>& player, size_t handIndex,
+                       PlayerResult result) {
+  const int bet = player->bet(handIndex);
   switch (result) {
     case PlayerResult::WIN:
-      player.addMoney(bet * 2);
+      player->addMoney(bet * 2);
       break;
     case PlayerResult::PUSH:
-      player.addMoney(bet);
+      player->addMoney(bet);
       break;
     case PlayerResult::LOSE:
       // Do nothing.

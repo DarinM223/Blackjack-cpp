@@ -18,18 +18,20 @@ class Player {
 
   std::string name() const { return this->name_; }
   int score(size_t handIndex) const { return this->scores_[handIndex]; }
+  size_t hands() const { return this->cards_.size(); }
+  std::vector<Card> hand(size_t index) const { return this->cards_[index]; }
+  void addCard(size_t handIndex, Card card);
+  virtual Action turn(size_t handIndex) const;
   virtual bool isBust(size_t handIndex) const {
     return this->scores_[handIndex] > 21;
   }
-  size_t hands() const { return this->cards_.size(); }
-  void addCard(size_t handIndex, Card card);
-  virtual Action turn(size_t handIndex) const;
 
   int money() const { return this->money_; }
   bool addMoney(int difference);
 
   int bet(size_t index) const { return this->bets_[index]; }
   bool addBet(size_t index, int amount);
+  virtual void placeBet();
 
   bool split(size_t handIndex);
   void reset();
@@ -43,6 +45,13 @@ class Player {
   int money_;
   std::string name_;
   std::vector<std::vector<Card>> cards_;
+};
+
+class AIPlayer : public Player {
+ public:
+  AIPlayer(std::string name, int money) : Player(name, money) {}
+  virtual Action turn(size_t handIndex) const override;
+  virtual void placeBet() override;
 };
 
 class Dealer {
