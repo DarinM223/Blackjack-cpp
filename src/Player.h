@@ -17,7 +17,6 @@ class Player {
   }
 
   std::string name() const { return this->name_; }
-  std::vector<int> scores() const { return this->scores_; }
   int score(size_t handIndex) const { return this->scores_[handIndex]; }
   virtual bool isBust(size_t handIndex) const {
     return this->scores_[handIndex] > 21;

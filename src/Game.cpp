@@ -56,15 +56,15 @@ void Game::run() {
   // Deals two cards to dealer.
   auto card1 = this->deck_.draw();
   auto card2 = this->deck_.draw();
-  this->dealer_.addCard(card1);
-  this->dealer_.addCard(card2);
+  this->dealer_.addCard(std::move(card1));
+  this->dealer_.addCard(std::move(card2));
 
   for (Player& player : this->players_) {
     // Deals two cards to every player initially.
     auto card1 = this->deck_.draw();
     auto card2 = this->deck_.draw();
-    player.addCard(0, card1);
-    player.addCard(0, card2);
+    player.addCard(0, std::move(card1));
+    player.addCard(0, std::move(card2));
 
     // Handles actions for every hand the player has.
     for (size_t handIndex = 0; handIndex < player.hands(); handIndex++) {
@@ -126,15 +126,15 @@ bool Game::applyAction(Player& player, size_t handIndex, Action action) {
       if (!player.addBet(handIndex, player.bet(handIndex))) return false;
     case Action::HIT: {
       auto card = this->deck_.draw();
-      player.addCard(handIndex, card);
+      player.addCard(handIndex, std::move(card));
       return true;
     }
     case Action::SPLIT: {
       if (!player.split(handIndex)) return false;
       auto card1 = this->deck_.draw();
       auto card2 = this->deck_.draw();
-      player.addCard(handIndex, card1);
-      player.addCard(player.hands() - 1, card2);
+      player.addCard(handIndex, std::move(card1));
+      player.addCard(player.hands() - 1, std::move(card2));
       return true;
     }
     case Action::STAND:
@@ -148,7 +148,7 @@ bool Game::applyAction(Dealer& dealer, Action action) {
   switch (action) {
     case Action::HIT: {
       auto card = this->deck_.draw();
-      dealer.addCard(card);
+      dealer.addCard(std::move(card));
       return true;
     }
     case Action::STAND:

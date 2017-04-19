@@ -9,7 +9,7 @@ TEST(PlayerTest, ScoreWithAces) {
   player.addCard(0, Card{Suite::HEARTS, 1});
   player.addCard(0, Card{Suite::DIAMONDS, 1});
 
-  EXPECT_EQ(player.scores()[0], 12);
+  EXPECT_EQ(player.score(0), 12);
 }
 
 TEST(PlayerTest, Money) {
@@ -58,9 +58,8 @@ TEST(PlayerTest, SplitSuccess) {
 
   EXPECT_EQ(player.hands(), static_cast<size_t>(2));
 
-  auto scores = player.scores();
-  EXPECT_EQ(scores[0], 11);
-  EXPECT_EQ(scores[1], 11);
+  EXPECT_EQ(player.score(0), 11);
+  EXPECT_EQ(player.score(1), 11);
 
   EXPECT_EQ(player.bet(0), 100);
   EXPECT_EQ(player.bet(1), 100);
@@ -76,7 +75,7 @@ TEST(PlayerTest, SplitFail) {
   EXPECT_EQ(player.split(0), false);
 
   EXPECT_EQ(player.hands(), static_cast<size_t>(1));
-  EXPECT_EQ(player.scores()[0], 12);
+  EXPECT_EQ(player.score(0), 12);
   EXPECT_EQ(player.money(), 40);
 }
 
@@ -90,7 +89,7 @@ TEST(PlayerTest, PlayerReset) {
   player.reset();
 
   EXPECT_EQ(player.hands(), static_cast<size_t>(1));
-  EXPECT_EQ(player.scores()[0], 0);
+  EXPECT_EQ(player.score(0), 0);
   EXPECT_EQ(player.bet(0), 0);
   EXPECT_EQ(player.money(), 80);
 }
