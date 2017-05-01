@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_COMPILER "g++")
+
 if(APPLE)
-    set(CMAKE_CXX_COMPILER "g++-6") # Set this to the homebrew latest g++.
     set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Werror")
 else()
-    set(CMAKE_CXX_COMPILER "g++")
     set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Werror -lpthread")
 endif()
 
