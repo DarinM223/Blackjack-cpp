@@ -76,7 +76,7 @@ void Game::run() {
         bool validAction;
         do {
           action = player->turn(handIndex);
-          validAction = this->applyAction(player, handIndex, action);
+          validAction = this->applyAction(*player, handIndex, action);
 
           if (!validAction)
             std::cout << "Invalid action\n";
@@ -110,7 +110,7 @@ void Game::run() {
 
       auto result = this->scoreHand(dealerScore, score);
       std::cout << playerResultToString(result) << "\n";
-      this->applyResult(player, i, result);
+      this->applyResult(*player, i, result);
     }
     std::cout << "\n";
 
@@ -120,22 +120,21 @@ void Game::run() {
   this->dealer_.reset();
 }
 
-bool Game::applyAction(std::unique_ptr<Player>& player, size_t handIndex,
-                       Action action) {
+bool Game::applyAction(Player& player, size_t handIndex, Action action) {
   switch (action) {
     case Action::DOUBLE:
-      if (!player->addBet(handIndex, player->bet(handIndex))) return false;
+      if (!player.addBet(handIndex, player.bet(handIndex))) return false;
     case Action::HIT: {
       auto card = this->deck_.draw();
-      player->addCard(handIndex, std::move(card));
+      player.addCard(handIndex, std::move(card));
       return true;
     }
     case Action::SPLIT: {
-      if (!player->split(handIndex)) return false;
+      if (!player.split(handIndex)) return false;
       auto card1 = this->deck_.draw();
       auto card2 = this->deck_.draw();
-      player->addCard(handIndex, std::move(card1));
-      player->addCard(player->hands() - 1, std::move(card2));
+      player.addCard(handIndex, std::move(card1));
+      player.addCard(player.hands() - 1, std::move(card2));
       return true;
     }
     case Action::STAND:
@@ -159,15 +158,14 @@ bool Game::applyAction(Dealer& dealer, Action action) {
   }
 }
 
-void Game::applyResult(std::unique_ptr<Player>& player, size_t handIndex,
-                       PlayerResult result) {
-  const int bet = player->bet(handIndex);
+void Game::applyResult(Player& player, size_t handIndex, PlayerResult result) {
+  const int bet = player.bet(handIndex);
   switch (result) {
     case PlayerResult::WIN:
-      player->addMoney(bet * 2);
+      player.addMoney(bet * 2);
       break;
     case PlayerResult::PUSH:
-      player->addMoney(bet);
+      player.addMoney(bet);
       break;
     case PlayerResult::LOSE:
       // Do nothing.

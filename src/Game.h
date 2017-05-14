@@ -20,10 +20,9 @@ class Game {
        std::vector<std::unique_ptr<Player>> players);
   virtual void askBets();
   virtual void run();
-  virtual bool applyAction(std::unique_ptr<Player>& player, size_t handIndex,
-                           Action action);
+  virtual bool applyAction(Player& player, size_t handIndex, Action action);
   virtual bool applyAction(Dealer& dealer, Action action);
-  virtual void applyResult(std::unique_ptr<Player>& player, size_t handIndex,
+  virtual void applyResult(Player& player, size_t handIndex,
                            PlayerResult result);
   virtual PlayerResult scoreHand(int dealerScore, int playerScore);
 
