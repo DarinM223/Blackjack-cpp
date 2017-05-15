@@ -13,10 +13,10 @@ Deck::Deck(std::random_device& rd) : rd_(rd) {
   // Generates standard 52 card deck.
   for (int value = 1; value <= 13; value++) {
     int cardValue = value > 9 ? 10 : value;
-    this->cards_.push_back(Card(Suite::DIAMONDS, cardValue));
-    this->cards_.push_back(Card(Suite::HEARTS, cardValue));
-    this->cards_.push_back(Card(Suite::SPADES, cardValue));
-    this->cards_.push_back(Card(Suite::CLUBS, cardValue));
+    this->cards_.emplace_back(Suite::DIAMONDS, cardValue);
+    this->cards_.emplace_back(Suite::HEARTS, cardValue);
+    this->cards_.emplace_back(Suite::SPADES, cardValue);
+    this->cards_.emplace_back(Suite::CLUBS, cardValue);
   }
 }
 

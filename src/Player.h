@@ -19,7 +19,9 @@ class Player {
   std::string name() const { return this->name_; }
   int score(size_t handIndex) const { return this->scores_[handIndex]; }
   size_t hands() const { return this->cards_.size(); }
-  std::vector<Card> hand(size_t index) const { return this->cards_[index]; }
+  const std::vector<Card>& hand(size_t index) const {
+    return this->cards_.at(index);
+  }
   void addCard(size_t handIndex, Card card);
   virtual Action turn(size_t handIndex) const;
   virtual bool isBust(size_t handIndex) const {
@@ -35,10 +37,9 @@ class Player {
 
   bool split(size_t handIndex);
   void reset();
-
- private:
   Card removeCard(size_t handIndex, size_t cardIndex);
 
+ private:
   std::vector<int> scores_;
   std::vector<int> numHighAces_;
   std::vector<int> bets_;

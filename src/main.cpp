@@ -12,10 +12,10 @@ int main() {
                           bot3 = std::make_unique<AIPlayer>("Bot3", 100);
 
   std::vector<std::unique_ptr<Player>> players;
-  players.push_back(std::move(mainPlayer));
-  players.push_back(std::move(bot1));
-  players.push_back(std::move(bot2));
-  players.push_back(std::move(bot3));
+  players.emplace_back(std::move(mainPlayer));
+  players.emplace_back(std::move(bot1));
+  players.emplace_back(std::move(bot2));
+  players.emplace_back(std::move(bot3));
 
   Game game{rd, "Dealer", std::move(players)};
   while (true) {

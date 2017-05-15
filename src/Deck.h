@@ -17,6 +17,12 @@ class Card {
  public:
   Card(Suite suite, int value) : suite_(suite), value_(value) {}
 
+  Card(const Card&) = delete;
+  Card& operator=(const Card&) = delete;
+
+  Card(Card&&) = default;
+  Card& operator=(Card&&) = default;
+
   Suite suite() const { return this->suite_; }
   int value() const { return this->value_; }
 

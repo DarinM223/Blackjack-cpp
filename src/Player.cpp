@@ -70,7 +70,7 @@ Action Player::turn(size_t handIndex) const {
 void Player::addCard(size_t handIndex, Card card) {
   std::tie(scores_[handIndex], numHighAces_[handIndex]) =
       Blackjack::addCard(card, scores_[handIndex], numHighAces_[handIndex]);
-  this->cards_[handIndex].push_back(card);
+  this->cards_[handIndex].emplace_back(std::move(card));
 }
 
 bool Player::addMoney(int difference) {
@@ -115,7 +115,7 @@ void Player::placeBet() {
 }
 
 bool Player::split(size_t handIndex) {
-  auto hand = this->cards_[handIndex];
+  auto& hand = this->cards_.at(handIndex);
 
   if (hand.size() == 2 && hand[0].value() == hand[1].value()) {
     auto bet = this->bets_[handIndex];
@@ -125,12 +125,12 @@ bool Player::split(size_t handIndex) {
 
     auto card = this->removeCard(handIndex, hand.size() - 1);
 
-    this->scores_.push_back(0);
-    this->numHighAces_.push_back(0);
-    this->bets_.push_back(bet);
-    this->cards_.push_back({});
+    this->scores_.emplace_back(0);
+    this->numHighAces_.emplace_back(0);
+    this->bets_.emplace_back(bet);
+    this->cards_.emplace_back();
 
-    this->addCard(this->hands() - 1, card);
+    this->addCard(this->hands() - 1, std::move(card));
     return true;
   }
   return false;
@@ -142,14 +142,14 @@ void Player::reset() {
   this->cards_.clear();
   this->bets_.clear();
 
-  this->scores_.push_back(0);
-  this->numHighAces_.push_back(0);
-  this->bets_.push_back(0);
-  this->cards_.push_back({});
+  this->scores_.emplace_back(0);
+  this->numHighAces_.emplace_back(0);
+  this->bets_.emplace_back(0);
+  this->cards_.emplace_back();
 }
 
 Card Player::removeCard(size_t handIndex, size_t cardIndex) {
-  auto hand = this->cards_[handIndex];
+  auto& hand = this->cards_.at(handIndex);
   auto card = std::move(hand[cardIndex]);
   hand.erase(hand.begin() + cardIndex);
 

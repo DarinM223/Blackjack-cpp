@@ -66,6 +66,16 @@ TEST(PlayerTest, SplitSuccess) {
   EXPECT_EQ(player.money(), 0);
 }
 
+TEST(PlayerTest, RemoveCard) {
+  Player player{"Bob", 200};
+  player.addCard(0, Card{Suite::HEARTS, 2});
+  player.addCard(0, Card{Suite::DIAMONDS, 2});
+
+  player.removeCard(0, 0);
+  EXPECT_EQ(player.score(0), 2);
+  EXPECT_EQ(player.hand(0).size(), static_cast<size_t>(1));
+}
+
 TEST(PlayerTest, SplitFail) {
   Player player{"Bob", 100};
   player.addCard(0, Card{Suite::HEARTS, 1});
